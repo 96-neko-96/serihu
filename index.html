@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>シチュエーションボイス生成ツール</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header class="header">
+        <div class="header-content">
+            <h1 class="header-title">
+                <span class="header-icon">🎙️</span>
+                シチュエーションボイス生成ツール
+            </h1>
+            <button class="btn-icon" id="settingsBtn" title="設定">
+                ⚙️
+            </button>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+        <!-- 入力エリア -->
+        <section class="input-section card">
+            <h2 class="section-title">入力設定</h2>
+
+            <!-- 用途選択 -->
+            <div class="form-group">
+                <label for="purpose">用途</label>
+                <select id="purpose" class="form-control">
+                    <option value="game">ゲームキャラクター</option>
+                    <option value="drama">ボイスドラマ</option>
+                    <option value="streamer">配信者向けボイス</option>
+                    <option value="anime">アニメ・漫画キャラ</option>
+                    <option value="asmr">ASMR・癒し系</option>
+                    <option value="other">その他</option>
+                </select>
+            </div>
+
+            <!-- その他用途（条件付き表示） -->
+            <div class="form-group" id="otherPurposeGroup" style="display: none;">
+                <label for="otherPurpose">その他の用途を入力</label>
+                <input type="text" id="otherPurpose" class="form-control" placeholder="例: ラジオドラマ、朗読">
+            </div>
+
+            <!-- セリフの長さ設定 -->
+            <div class="form-group">
+                <label>セリフの長さ</label>
+                <div class="length-tabs">
+                    <button class="tab-btn active" data-tab="count">セリフ数</button>
+                    <button class="tab-btn" data-tab="time">時間</button>
+                    <button class="tab-btn" data-tab="stage">段階</button>
+                </div>
+
+                <!-- セリフ数 -->
+                <div class="tab-content active" id="lengthCount">
+                    <div class="input-with-unit">
+                        <input type="number" id="lineCount" class="form-control" min="1" max="100" value="10">
+                        <span class="unit">セリフ</span>
+                    </div>
+                </div>
+
+                <!-- 時間 -->
+                <div class="tab-content" id="lengthTime">
+                    <div class="input-with-unit">
+                        <input type="number" id="timeValue" class="form-control" min="1" value="30">
+                        <select id="timeUnit" class="form-control-small">
+                            <option value="seconds">秒</option>
+                            <option value="minutes">分</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 段階 -->
+                <div class="tab-content" id="lengthStage">
+                    <select id="stageSelect" class="form-control">
+                        <option value="single">一つのセリフ（1〜2行）</option>
+                        <option value="situation">シチュエーションボイス（5〜10セリフ）</option>
+                        <option value="scene">劇のワンシーン（10〜30セリフ）</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 入力方式タブ -->
+            <div class="form-group">
+                <div class="input-mode-tabs">
+                    <button class="tab-btn active" data-tab="simple">簡単入力</button>
+                    <button class="tab-btn" data-tab="detailed">詳細入力</button>
+                </div>
+
+                <!-- 簡単入力 -->
+                <div class="tab-content active" id="simpleInput">
+                    <textarea id="simpleText" class="form-control textarea" rows="6" placeholder="どんなシチュエーションのセリフを生成しますか？&#10;&#10;例: 戦闘シーンでの勝利セリフ、朝の挨拶、告白シーン など"></textarea>
+                </div>
+
+                <!-- 詳細入力 -->
+                <div class="tab-content" id="detailedInput">
+                    <h3 class="subsection-title">シチュエーション設定</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="location">舞台/場所</label>
+                            <input type="text" id="location" class="form-control" placeholder="例: 学校の屋上、森の中">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="timeOfDay">時間帯</label>
+                            <select id="timeOfDay" class="form-control">
+                                <option value="morning">朝</option>
+                                <option value="noon">昼</option>
+                                <option value="evening">夕方</option>
+                                <option value="night">夜</option>
+                                <option value="midnight">深夜</option>
+                                <option value="unspecified">不定</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="situation">状況説明</label>
+                        <textarea id="situation" class="form-control textarea" rows="3" placeholder="どのような状況ですか？"></textarea>
+                    </div>
+
+                    <h3 class="subsection-title">キャラクター設定</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="charName">名前</label>
+                            <input type="text" id="charName" class="form-control" placeholder="例: さくら">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="charGender">性別</label>
+                            <select id="charGender" class="form-control">
+                                <option value="male">男性</option>
+                                <option value="female">女性</option>
+                                <option value="other">その他</option>
+                                <option value="unknown">不明</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="charAge">年齢</label>
+                            <input type="text" id="charAge" class="form-control" placeholder="例: 20、10代">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="charPersonality">性格</label>
+                            <input type="text" id="charPersonality" class="form-control" placeholder="例: 明るい、クール、天然">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="charTone">口調</label>
+                            <input type="text" id="charTone" class="form-control" placeholder="例: です・ます調、タメ口">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="charVoice">声質</label>
+                            <input type="text" id="charVoice" class="form-control" placeholder="例: 高め、低め、ハスキー">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="charRole">役割</label>
+                            <input type="text" id="charRole" class="form-control" placeholder="例: 主人公、ヒロイン">
+                        </div>
+                    </div>
+
+                    <h3 class="subsection-title future-feature">将来の拡張機能</h3>
+                    <div class="form-group disabled">
+                        <label for="numCharacters">登場人物数 <span class="badge">準備中</span></label>
+                        <select id="numCharacters" class="form-control" disabled>
+                            <option value="1">1人（現在のバージョン）</option>
+                            <option value="2">2人</option>
+                            <option value="3">3人</option>
+                            <option value="4">4人</option>
+                            <option value="5">5人</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group disabled">
+                        <label for="relationship">キャラクター間の関係性 <span class="badge">準備中</span></label>
+                        <textarea id="relationship" class="form-control textarea" rows="2" disabled placeholder="例: 幼馴染、ライバル関係"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- オプション -->
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="avoidSimilar">
+                    <span>履歴から類似内容を避ける</span>
+                </label>
+                <p class="help-text">過去5件の生成結果を参照して、異なる内容を生成します</p>
+            </div>
+
+            <!-- 生成ボタン -->
+            <button class="btn-primary btn-large" id="generateBtn">
+                <span class="btn-text">生成する</span>
+            </button>
+        </section>
+
+        <!-- 出力エリア -->
+        <section class="output-section card">
+            <div class="section-header">
+                <h2 class="section-title">生成結果</h2>
+                <div class="format-selector">
+                    <label for="outputFormat">フォーマット:</label>
+                    <select id="outputFormat" class="form-control-small">
+                        <option value="text">テキストのみ</option>
+                        <option value="simple">シンプル台本</option>
+                        <option value="detailed">詳細台本</option>
+                        <option value="custom">カスタム</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- カスタムフォーマット説明（条件付き表示） -->
+            <div id="customFormatHelp" class="info-panel" style="display: none;">
+                <h4>カスタムフォーマット変数</h4>
+                <ul>
+                    <li><code>{character}</code> - キャラクター名</li>
+                    <li><code>{line}</code> - セリフ内容</li>
+                    <li><code>{scene}</code> - シーン番号</li>
+                    <li><code>{direction}</code> - ト書き（あれば）</li>
+                </ul>
+                <textarea id="customTemplate" class="form-control textarea" rows="3" placeholder="例: {character}: {line}"></textarea>
+            </div>
+
+            <!-- 出力表示 -->
+            <textarea id="outputArea" class="output-display" rows="20" placeholder="生成ボタンをクリックしてセリフを生成してください"></textarea>
+
+            <!-- アクションボタン -->
+            <div id="outputActions" class="output-actions" style="display: none;">
+                <button class="btn-secondary" id="regenerateBtn">
+                    <span>🔄 再生成</span>
+                </button>
+                <button class="btn-secondary" id="copyBtn">
+                    <span>📋 全体をコピー</span>
+                </button>
+                <button class="btn-secondary" id="favoriteBtn">
+                    <span>⭐ お気に入り</span>
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- サイドバー（トグル式） -->
+    <aside class="sidebar" id="sidebar">
+        <button class="sidebar-toggle" id="sidebarToggle">
+            <span class="toggle-icon">◀</span>
+        </button>
+
+        <div class="sidebar-content">
+            <div class="sidebar-tabs">
+                <button class="sidebar-tab active" data-tab="history">履歴</button>
+                <button class="sidebar-tab" data-tab="favorites">お気に入り</button>
+            </div>
+
+            <!-- 履歴タブ -->
+            <div class="sidebar-tab-content active" id="historyTab">
+                <div class="sidebar-header">
+                    <h3>履歴</h3>
+                    <button class="btn-icon-small" id="exportHistoryBtn" title="エクスポート">💾</button>
+                </div>
+                <div id="historyList" class="history-list">
+                    <div class="empty-state-small">履歴がありません</div>
+                </div>
+            </div>
+
+            <!-- お気に入りタブ -->
+            <div class="sidebar-tab-content" id="favoritesTab">
+                <div class="sidebar-header">
+                    <h3>お気に入り</h3>
+                    <div class="sidebar-actions">
+                        <button class="btn-icon-small" id="importFavoritesBtn" title="インポート">📂</button>
+                        <button class="btn-icon-small" id="exportFavoritesBtn" title="エクスポート">💾</button>
+                    </div>
+                </div>
+                <div id="favoritesList" class="favorites-list">
+                    <div class="empty-state-small">お気に入りがありません</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 設定モーダル -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>設定</h2>
+                <button class="modal-close" id="closeSettingsBtn">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <!-- APIキー設定 -->
+                <div class="settings-section">
+                    <h3>Gemini API設定</h3>
+                    <div class="form-group">
+                        <label for="apiKey">APIキー</label>
+                        <div class="password-input">
+                            <input type="password" id="apiKey" class="form-control" placeholder="sk-...">
+                            <button class="btn-icon-small" id="toggleApiKeyBtn" type="button">👁️</button>
+                        </div>
+                        <p class="warning-text">⚠️ APIキーはブラウザのLocalStorageに平文で保存されます。共用PCでは注意してください。</p>
+                    </div>
+
+                    <button class="btn-secondary" id="saveApiKeyBtn">APIキーを保存</button>
+                </div>
+
+                <!-- モデル設定 -->
+                <div class="settings-section">
+                    <h3>モデル設定</h3>
+
+                    <div class="form-group">
+                        <label for="selectedModel">使用モデル</label>
+                        <select id="selectedModel" class="form-control">
+                            <option value="gemini-2.0-flash-exp">gemini-2.0-flash-exp</option>
+                            <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+                            <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="showFavoritesOnly">
+                            <span>お気に入りモデルのみ表示</span>
+                        </label>
+                    </div>
+
+                    <div class="model-list">
+                        <h4>モデル一覧</h4>
+                        <div id="modelList" class="model-items">
+                            <!-- モデルリストはJSで生成 -->
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customModelId">カスタムモデルを追加</label>
+                        <div class="input-with-button">
+                            <input type="text" id="customModelId" class="form-control" placeholder="例: gemini-2.5-flash-lite">
+                            <button class="btn-secondary" id="addModelBtn">追加</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ローディングオーバーレイ -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p class="loading-text">生成中...</p>
+    </div>
+
+    <!-- Scripts -->
+    <script src="storage.js"></script>
+    <script src="api.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
