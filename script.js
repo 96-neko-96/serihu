@@ -110,6 +110,9 @@ function setupEventListeners() {
     document.getElementById('exportHistoryBtn').addEventListener('click', exportHistory);
     document.getElementById('exportFavoritesBtn').addEventListener('click', exportFavorites);
     document.getElementById('importFavoritesBtn').addEventListener('click', importFavorites);
+
+    // ランダムシチュエーション生成
+    document.getElementById('randomSituationBtn').addEventListener('click', handleRandomSituation);
 }
 
 // ===================================
@@ -1044,4 +1047,49 @@ function formatDateTime(isoString) {
     const minutes = date.getMinutes().toString().padStart(2, '0');
 
     return `${month}/${day} ${hours}:${minutes}`;
+}
+
+// ===================================
+// ランダムシチュエーション生成
+// ===================================
+
+async function handleRandomSituation() {
+    try {
+        // APIキーチェック
+        if (!Storage.getApiKey()) {
+            showError('APIキーが設定されていません。設定画面からAPIキーを登録してください。');
+            openSettings();
+            return;
+        }
+
+        // ローディング表示
+        showLoading();
+
+        // ボタンを無効化
+        const btn = document.getElementById('randomSituationBtn');
+        btn.disabled = true;
+
+        // API呼び出し
+        const situation = await GeminiAPI.generateRandomSituation();
+
+        // ローディング非表示
+        hideLoading();
+
+        // ボタンを有効化
+        btn.disabled = false;
+
+        // テキストエリアに挿入
+        document.getElementById('simpleText').value = situation;
+
+        showSuccess('ランダムシチュエーションを生成しました！');
+
+    } catch (error) {
+        hideLoading();
+
+        // ボタンを有効化
+        const btn = document.getElementById('randomSituationBtn');
+        btn.disabled = false;
+
+        showError(error.message);
+    }
 }

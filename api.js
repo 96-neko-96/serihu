@@ -254,6 +254,88 @@ const GeminiAPI = {
             console.error('API Key Test Error:', error);
             return false;
         }
+    },
+
+    /**
+     * ランダムなシチュエーションを生成
+     * @returns {Promise<string>} - 生成されたシチュエーション
+     */
+    async generateRandomSituation() {
+        const apiKey = Storage.getApiKey();
+
+        if (!apiKey) {
+            throw new Error('APIキーが設定されていません。設定画面からAPIキーを登録してください。');
+        }
+
+        const model = Storage.getSelectedModel();
+
+        // ランダムなシチュエーションを生成するためのプロンプト
+        const prompt = `あなたはシチュエーションボイス・セリフ生成の専門家です。
+ボイスドラマやゲーム、アニメなどで使えるような、創造的で面白いシチュエーションを1つ考えてください。
+
+シチュエーションの例:
+- 戦闘シーンでの勝利セリフ
+- 朝の挨拶
+- 告白シーン
+- カフェでの日常会話
+- 魔法を使う瞬間
+- ツンデレキャラの照れるシーン
+- 幼馴染との再会
+- ライバルとの決闘前
+- 深夜のコンビニでの出会い
+- 異世界に転移した直後
+
+これらとは異なる、ユニークで魅力的なシチュエーションを1つだけ、簡潔に（1〜2行で）提案してください。
+余計な説明は不要です。シチュエーションの内容のみを出力してください。`;
+
+        const url = `${this.BASE_URL}/${model}:generateContent?key=${apiKey}`;
+
+        const requestBody = {
+            contents: [
+                {
+                    parts: [
+                        {
+                            text: prompt
+                        }
+                    ]
+                }
+            ],
+            generationConfig: {
+                temperature: 1.0,  // ランダム性を高める
+                topK: 40,
+                topP: 0.95,
+                maxOutputTokens: 256,
+            }
+        };
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(this.parseError(response.status, errorData));
+            }
+
+            const data = await response.json();
+
+            // レスポンスからテキストを抽出
+            if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+                const situationText = data.candidates[0].content.parts[0].text.trim();
+                return situationText;
+            } else {
+                throw new Error('APIからの応答が不正です。');
+            }
+
+        } catch (error) {
+            console.error('Gemini API Error:', error);
+            throw error;
+        }
     }
 };
 
