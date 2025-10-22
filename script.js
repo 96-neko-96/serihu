@@ -354,7 +354,6 @@ function validateConfig(config) {
 
 function displayResult(text, format) {
     const outputArea = document.getElementById('outputArea');
-    outputArea.innerHTML = '';
 
     let formattedText = text;
 
@@ -375,12 +374,8 @@ function displayResult(text, format) {
         }
     }
 
-    // テキストを表示
-    const pre = document.createElement('pre');
-    pre.style.whiteSpace = 'pre-wrap';
-    pre.style.fontFamily = 'inherit';
-    pre.textContent = formattedText;
-    outputArea.appendChild(pre);
+    // テキストエリアに表示
+    outputArea.value = formattedText;
 }
 
 // ===================================
@@ -443,7 +438,7 @@ function applyCustomFormat(text, template) {
 
 function handleCopy() {
     const outputArea = document.getElementById('outputArea');
-    const text = outputArea.textContent;
+    const text = outputArea.value;
 
     navigator.clipboard.writeText(text).then(() => {
         showSuccess('クリップボードにコピーしました！');
@@ -458,14 +453,17 @@ function handleCopy() {
 // ===================================
 
 function handleAddFavorite() {
-    if (!AppState.currentResult) {
+    const outputArea = document.getElementById('outputArea');
+    const currentContent = outputArea.value;
+
+    if (!currentContent || currentContent.trim() === '') {
         showError('お気に入りに追加する内容がありません。');
         return;
     }
 
     const favoriteItem = {
         historyId: AppState.currentHistoryId,
-        content: AppState.currentResult,
+        content: currentContent, // テキストエリアの現在の値を使用（編集後の内容）
         config: AppState.currentConfig,
         memo: '',
         tags: []

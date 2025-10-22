@@ -430,6 +430,7 @@ body {
 }
 
 .output-display {
+    width: 100%;
     min-height: 300px;
     max-height: 600px;
     overflow-y: auto;
@@ -440,6 +441,14 @@ body {
     white-space: pre-wrap;
     font-family: var(--font-body);
     line-height: 1.8;
+    resize: vertical;
+    font-size: 0.95rem;
+}
+
+.output-display:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .empty-state {
