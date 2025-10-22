@@ -19,6 +19,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initializeApp() {
+    // テーマの初期化
+    initializeTheme();
+
     // 設定の読み込み
     loadSettings();
 
@@ -73,6 +76,9 @@ function setupEventListeners() {
     document.querySelectorAll('.sidebar-tab').forEach(tab => {
         tab.addEventListener('click', handleSidebarTabSwitch);
     });
+
+    // テーマ切り替えボタン
+    document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
 
     // 設定ボタン
     document.getElementById('settingsBtn').addEventListener('click', openSettings);
@@ -980,6 +986,33 @@ function showSuccess(message) {
         setTimeout(() => {
             copyBtn.innerHTML = originalText;
         }, 2000);
+    }
+}
+
+// ===================================
+// テーマ切り替え
+// ===================================
+
+function initializeTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    setTheme(savedTheme);
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+}
+
+function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+
+    // アイコンの更新
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    if (themeToggleBtn) {
+        themeToggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
+        themeToggleBtn.title = theme === 'dark' ? 'ライトモードに切り替え' : 'ダークモードに切り替え';
     }
 }
 
